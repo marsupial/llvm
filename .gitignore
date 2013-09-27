@@ -49,7 +49,8 @@ projects/*
 runtimes/*
 !runtimes/*.*
 # Clang, which is tracked independently.
-tools/clang
+# but not for ROOT!
+# tools/clang
 # Cling, which is tracked independently.
 tools/cling
 # LLDB, which is tracked independently.
