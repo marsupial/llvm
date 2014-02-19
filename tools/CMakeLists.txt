@@ -47,6 +47,10 @@ add_llvm_external_project(llgo)
 add_llvm_external_project(lld)
 add_llvm_external_project(lldb)
 
+if(LLVM_NOCLING)
+  ignore_llvm_tool_subdirectory(cling)
+endif()
+
 # Automatically add remaining sub-directories containing a 'CMakeLists.txt'
 # file as external projects.
 add_llvm_implicit_projects()
