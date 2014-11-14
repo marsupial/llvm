@@ -38,6 +38,7 @@
 #include <cassert>
 #include <cstdint>
 #include <ctime>
+#include <dirent.h>
 #include <stack>
 #include <string>
 #include <system_error>
