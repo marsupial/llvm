@@ -51,6 +51,10 @@ if(LLVM_NOCLING)
   ignore_llvm_tool_subdirectory(cling)
 endif()
 
+if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/../../../cling)
+  add_llvm_external_project(../../../cling)
+endif()
+
 # Automatically add remaining sub-directories containing a 'CMakeLists.txt'
 # file as external projects.
 add_llvm_implicit_projects()
