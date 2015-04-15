@@ -450,7 +450,7 @@ protected:
 public:
   RuntimeDyldImpl(RuntimeDyld::MemoryManager &MemMgr,
                   JITSymbolResolver &Resolver)
-    : MemMgr(MemMgr), Resolver(Resolver), Checker(nullptr),
+    : MemMgr(MemMgr), Resolver(Resolver), Checker(nullptr), Relocations(4),
       ProcessAllSections(false), HasError(false) {
   }
 
