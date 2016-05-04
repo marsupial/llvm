@@ -34,9 +34,9 @@ public:
 
   JITSymbol findSymbol(const std::string &Name) override;
 
-  // MCJIT doesn't support logical dylibs.
+  // Defer to the client resolver for lookup in logical dylibs.
   JITSymbol findSymbolInLogicalDylib(const std::string &Name) override {
-    return nullptr;
+    return ClientResolver->findSymbolInLogicalDylib(Name);
   }
 
 private:
