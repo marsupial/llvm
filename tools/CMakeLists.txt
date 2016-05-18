@@ -48,7 +48,7 @@ add_llvm_external_project(lld)
 add_llvm_external_project(lldb)
 
 if(LLVM_NOCLING)
-  ignore_llvm_tool_subdirectory(cling)
+  set(LLVM_TOOL_CLING_BUILD Off)
 endif()
 
 if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/../../../cling)
