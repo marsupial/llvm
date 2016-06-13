@@ -222,6 +222,7 @@ public:
 
   void writeRelocations(const MCAssembler &Asm, const MCSectionELF &Sec);
 
+  using MCObjectWriter::isSymbolRefDifferenceFullyResolvedImpl;
   bool isSymbolRefDifferenceFullyResolvedImpl(const MCAssembler &Asm,
                                               const MCSymbol &SymA,
                                               const MCFragment &FB, bool InSet,
