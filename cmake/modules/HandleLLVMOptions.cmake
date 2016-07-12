@@ -576,6 +576,10 @@ add_llvm_definitions( -D__STDC_CONSTANT_MACROS )
 add_llvm_definitions( -D__STDC_FORMAT_MACROS )
 add_llvm_definitions( -D__STDC_LIMIT_MACROS )
 
+if(CLING_CLANG_RUNTIME_PATCH)
+  add_definitions(-DCLING_CLANG_RUNTIME_PATCH)
+endif()
+
 # clang doesn't print colored diagnostics when invoked from Ninja
 if (UNIX AND
     CMAKE_CXX_COMPILER_ID MATCHES "Clang" AND
