@@ -10,6 +10,7 @@
 #ifndef LLVM_LIB_EXECUTIONENGINE_MCJIT_MCJIT_H
 #define LLVM_LIB_EXECUTIONENGINE_MCJIT_MCJIT_H
 
+#include "llvm/Support/cling.h"
 #include "llvm/ADT/SmallPtrSet.h"
 #include "llvm/ADT/SmallVector.h"
 #include "llvm/ExecutionEngine/ExecutionEngine.h"
@@ -34,10 +35,13 @@ public:
 
   RuntimeDyld::SymbolInfo findSymbol(const std::string &Name) override;
 
-  // Defer to the client resolver for lookup in logical dylibs.
+  // MCJIT doesn't support logical dylibs.
   RuntimeDyld::SymbolInfo
   findSymbolInLogicalDylib(const std::string &Name) override {
-    return ClientResolver->findSymbolInLogicalDylib(Name);
+    // CLING: Defer to the client resolver for lookup in logical dylibs.
+    if (cling::isClient())
+      return ClientResolver->findSymbolInLogicalDylib(Name);
+    return nullptr;
   }
 
 private:
