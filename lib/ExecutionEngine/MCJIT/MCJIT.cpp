@@ -8,6 +8,7 @@
 //===----------------------------------------------------------------------===//
 
 #include "MCJIT.h"
+#include "llvm/Support/cling.h"
 #include "llvm/ADT/STLExtras.h"
 #include "llvm/ExecutionEngine/GenericValue.h"
 #include "llvm/ExecutionEngine/JITEventListener.h"
@@ -202,7 +203,8 @@ void MCJIT::generateCodeForModule(Module *M) {
   // If the cache did not contain a suitable object, compile the object
   if (!ObjectToLoad) {
 
-    OwnedModules.markModuleAsLoaded(M);
+    if (cling::isClient())
+      OwnedModules.markModuleAsLoaded(M);
 
     ObjectToLoad = emitObject(M);
     assert(ObjectToLoad && "Compilation did not produce an object.");
@@ -229,6 +231,9 @@ void MCJIT::generateCodeForModule(Module *M) {
 
   Buffers.push_back(std::move(ObjectToLoad));
   LoadedObjects.push_back(std::move(*LoadedObject));
+
+  if (!cling::isClient())
+  OwnedModules.markModuleAsLoaded(M);
 }
 
 void MCJIT::finalizeLoadedModules() {

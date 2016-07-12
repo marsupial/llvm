@@ -7,12 +7,29 @@
 //
 //===----------------------------------------------------------------------===//
 
+#include "llvm/Support/cling.h"
 #include "llvm/Support/TargetRegistry.h"
 #include "llvm/ADT/STLExtras.h"
 #include "llvm/ADT/StringRef.h"
 #include "llvm/Support/raw_ostream.h"
 #include <cassert>
 #include <vector>
+
+// Seems the most reasonable place to put this
+#ifdef CLING_CLANG_RUNTIME_PATCH
+namespace cling {
+
+  namespace dont { namespace use { namespace directly {
+    ClientFlags gClingRuntimeFlags = kClingIsNotHost;
+  } } }
+
+  ClientFlags setClientFlags(ClientFlags Flags) {
+    std::swap(Flags, dont::use::directly::gClingRuntimeFlags);
+    return Flags;
+  }
+}
+#endif // CLING_CLANG_RUNTIME_SUPPORT
+
 using namespace llvm;
 
 // Clients are responsible for avoid race conditions in registration.

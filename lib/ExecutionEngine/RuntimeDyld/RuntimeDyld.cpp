@@ -11,6 +11,7 @@
 //
 //===----------------------------------------------------------------------===//
 
+#include "llvm/Support/cling.h"
 #include "llvm/ExecutionEngine/RuntimeDyld.h"
 #include "RuntimeDyldCheckerImpl.h"
 #include "RuntimeDyldCOFF.h"
@@ -215,7 +216,7 @@ RuntimeDyldImpl::loadObjectImpl(const object::ObjectFile &Obj) {
     if (Flags & SymbolRef::SF_Common)
       CommonSymbols.push_back(*I);
     else if ((Flags & SymbolRef::SF_Weak)
-             && !(Flags & SymbolRef::SF_Undefined)) {
+             && !(Flags & SymbolRef::SF_Undefined) && cling::isClient()) {
       // Weak *undefined* symbols are not in any section.
       // Treat them as ordinary symbols below.
       section_iterator SI = Obj.section_end();
@@ -315,7 +316,7 @@ RuntimeDyldImpl::loadObjectImpl(const object::ObjectFile &Obj) {
     }
   }
 
-  // Finalize weak symbols
+  // CLING: Finalize weak symbols
   if (auto Err = emitWeakSymbols(Obj, LocalSections, WeakSymbols))
     return std::move(Err);
 

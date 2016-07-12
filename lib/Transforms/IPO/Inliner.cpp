@@ -13,6 +13,7 @@
 //
 //===----------------------------------------------------------------------===//
 
+#include "llvm/Support/cling.h"
 #include "llvm/Transforms/IPO/Inliner.h"
 #include "llvm/ADT/SmallPtrSet.h"
 #include "llvm/ADT/Statistic.h"
@@ -593,7 +594,7 @@ inlineCallsImpl(CallGraphSCC &SCC, CallGraph &CG,
 
       // If we inlined or deleted the last possible call site to the function,
       // delete the function body now.
-      if (false && Callee && Callee->use_empty() && Callee->hasLocalLinkage() &&
+      if (!cling::isClient() && Callee && Callee->use_empty() && Callee->hasLocalLinkage() &&
           // TODO: Can remove if in SCC now.
           !SCCFunctions.count(Callee) &&
 
