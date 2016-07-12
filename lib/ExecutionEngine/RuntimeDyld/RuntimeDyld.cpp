@@ -635,7 +635,7 @@ Error RuntimeDyldImpl::emitWeakSymbols(const ObjectFile &Obj,
 
     uint64_t SectOffset;
     if (auto Err = getOffset(Sym, *SI, SectOffset))
-      return std::move(Err);
+      return Err;
     bool IsCode = SI->isText();
     unsigned SectionID;
     if (auto SectionIDOrErr = findOrEmitSection(Obj, *SI, IsCode,LocalSections))
