@@ -305,7 +305,7 @@ public:
       unsigned VReg = G.getNodeMetadata(NId).getVReg();
       LiveInterval &LI = LIS.getInterval(VReg);
       assert(!LI.empty() && "PBQP graph contains node for empty interval");
-      Inactive.push(std::make_tuple(&LI, 0, NId));
+      Inactive.push(std::make_tuple(&LI, size_t(0), NId));
     }
 
     while (!Inactive.empty()) {

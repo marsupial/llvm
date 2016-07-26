@@ -45,14 +45,11 @@ typedef std::pair<const MachineInstr *, const MachineInstr *> InsnRange;
 class LexicalScope {
 
 public:
-  LexicalScope(LexicalScope *P, const DILocalScope *D, const DILocation *I,
-               bool A)
-      : Parent(P), Desc(D), InlinedAtLocation(I), AbstractScope(A),
+  LexicalScope(const DILocalScope *D, const DILocation *I, bool A)
+      : Parent(nullptr), Desc(D), InlinedAtLocation(I), AbstractScope(A),
         LastInsn(nullptr), FirstInsn(nullptr), DFSIn(0), DFSOut(0) {
     assert((!D || D->isResolved()) && "Expected resolved node");
     assert((!I || I->isResolved()) && "Expected resolved node");
-    if (Parent)
-      Parent->addChild(this);
   }
 
   // Accessors.
@@ -66,6 +63,15 @@ public:
 
   /// addChild - Add a child scope.
   void addChild(LexicalScope *S) { Children.push_back(S); }
+
+  /// setParent - Make the scope a child of another.
+  void setParent(LexicalScope *P) {
+    assert(!Parent && "Cannot change parent");
+    if (P) {
+      P->addChild(this);
+      Parent = P;
+    }
+  }
 
   /// openInsnRange - This scope covers instruction range starting from MI.
   void openInsnRange(const MachineInstr *MI) {
