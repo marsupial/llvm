@@ -150,10 +150,14 @@ LexicalScopes::getOrCreateRegularScope(const DILocalScope *Scope) {
   LexicalScope *Parent = nullptr;
   if (auto *Block = dyn_cast<DILexicalBlockBase>(Scope))
     Parent = getOrCreateLexicalScope(Block->getScope());
-  I = LexicalScopeMap.emplace(std::piecewise_construct,
-                              std::forward_as_tuple(Scope),
-                              std::forward_as_tuple(Parent, Scope, nullptr,
-                                                    false)).first;
+
+  I = LexicalScopeMap.find(Scope);
+  if (I == LexicalScopeMap.end()) {
+    I = LexicalScopeMap
+            .insert(std::make_pair(Scope, LexicalScope(Scope, nullptr, false)))
+            .first;
+    I->second.setParent(Parent);
+  }
 
   if (!Parent) {
     assert(cast<DISubprogram>(Scope)->describes(MF->getFunction()));
@@ -181,11 +185,14 @@ LexicalScopes::getOrCreateInlinedScope(const DILocalScope *Scope,
   else
     Parent = getOrCreateLexicalScope(InlinedAt);
 
-  I = InlinedLexicalScopeMap.emplace(std::piecewise_construct,
-                                     std::forward_as_tuple(P),
-                                     std::forward_as_tuple(Parent, Scope,
-                                                           InlinedAt, false))
-          .first;
+  I = InlinedLexicalScopeMap.find(P);
+  if (I == InlinedLexicalScopeMap.end()) {
+    I = InlinedLexicalScopeMap
+            .insert(std::make_pair(P, LexicalScope(Scope, InlinedAt, false)))
+            .first;
+    I->second.setParent(Parent);
+  }
+
   return &I->second;
 }
 
@@ -203,10 +210,14 @@ LexicalScopes::getOrCreateAbstractScope(const DILocalScope *Scope) {
   if (auto *Block = dyn_cast<DILexicalBlockBase>(Scope))
     Parent = getOrCreateAbstractScope(Block->getScope());
 
-  I = AbstractScopeMap.emplace(std::piecewise_construct,
-                               std::forward_as_tuple(Scope),
-                               std::forward_as_tuple(Parent, Scope,
-                                                     nullptr, true)).first;
+  I = AbstractScopeMap.find(Scope);
+  if (I == AbstractScopeMap.end()) {
+    I = AbstractScopeMap
+            .insert(std::make_pair(Scope, LexicalScope(Scope, nullptr, true)))
+            .first;
+    I->second.setParent(Parent);
+  }
+
   if (isa<DISubprogram>(Scope))
     AbstractScopesList.push_back(&I->second);
   return &I->second;
