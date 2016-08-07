@@ -37,7 +37,6 @@
 #include <cstdint>
 #include <ctime>
 #include <memory>
-#include <dirent.h>
 #include <stack>
 #include <string>
 #include <system_error>
