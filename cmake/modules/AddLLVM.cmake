@@ -792,8 +792,12 @@ function(export_executable_symbols target)
     # it without any trouble.
     set_target_properties(${target} PROPERTIES ENABLE_EXPORTS 1)
     if (APPLE)
-      set_property(TARGET ${target} APPEND_STRING PROPERTY
-        LINK_FLAGS " -rdynamic")
+      if (NOT CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_VERSION VERSION_GREATER "6.0.0")
+        set_property(TARGET ${target} APPEND_STRING PROPERTY
+          LINK_FLAGS " -rdynamic")
+      else()
+        MESSAGE(STATUS "-rdynamic not supported")
+      endif()
     endif()
   endif()
 endfunction()
