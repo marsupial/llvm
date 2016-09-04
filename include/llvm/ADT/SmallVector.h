@@ -27,6 +27,7 @@
 #include <initializer_list>
 #include <iterator>
 #include <memory>
+#include <stdlib.h> // malloc, free
 
 namespace llvm {
 
