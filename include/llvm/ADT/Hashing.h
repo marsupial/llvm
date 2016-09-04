@@ -55,6 +55,7 @@
 #include <cstdlib>
 #include <string>
 #include <utility>
+#include <stdlib.h> // abort
 
 namespace llvm {
 

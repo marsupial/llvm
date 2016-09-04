@@ -30,6 +30,7 @@
 #include <new>
 #include <type_traits>
 #include <utility>
+#include <stdlib.h> // malloc, free
 
 namespace llvm {
 
