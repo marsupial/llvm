@@ -52,6 +52,7 @@
 #include <algorithm>
 #include <cassert>
 #include <cstring>
+#include <cstdlib>
 #include <string>
 #include <utility>
 
@@ -542,7 +543,7 @@ public:
       // store types smaller than the buffer.
       if (!store_and_advance(buffer_ptr, buffer_end, data,
                              partial_store_size))
-        abort();
+        std::abort();
     }
     return buffer_ptr;
   }
