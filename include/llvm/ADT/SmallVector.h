@@ -247,7 +247,7 @@ void SmallVectorTemplateBase<T, isPodLike>::grow(size_t MinSize) {
 
   // If this wasn't grown from the inline copy, deallocate the old space.
   if (!this->isSmall())
-    free(this->begin());
+    std::free(this->begin());
 
   this->setEnd(NewElts+CurSize);
   this->BeginX = NewElts;
@@ -341,7 +341,7 @@ public:
 
     // If this wasn't grown from the inline copy, deallocate the old space.
     if (!this->isSmall())
-      free(this->begin());
+      std::free(this->begin());
   }
 
   void clear() {
@@ -766,7 +766,7 @@ SmallVectorImpl<T> &SmallVectorImpl<T>::operator=(SmallVectorImpl<T> &&RHS) {
   // If the RHS isn't small, clear this vector and then steal its buffer.
   if (!RHS.isSmall()) {
     this->destroy_range(this->begin(), this->end());
-    if (!this->isSmall()) free(this->begin());
+    if (!this->isSmall()) std::free(this->begin());
     this->BeginX = RHS.BeginX;
     this->EndX = RHS.EndX;
     this->CapacityX = RHS.CapacityX;
