@@ -139,7 +139,3 @@ add_llvm_library(LLVMSupport
   )
 
 set_property(TARGET LLVMSupport PROPERTY LLVM_SYSTEM_LIBS "${system_libs}")
-
-if(CLING_CLANG_RUNTIME_PATCH)
-  add_definitions(-DCLING_CLANG_RUNTIME_PATCH)
-endif()

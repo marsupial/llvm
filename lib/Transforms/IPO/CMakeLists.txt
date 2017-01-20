@@ -38,7 +38,3 @@ add_llvm_library(LLVMipo
   DEPENDS
   intrinsics_gen
   )
-
-if(CLING_CLANG_RUNTIME_PATCH)
-  add_definitions(-DCLING_CLANG_RUNTIME_PATCH)
-endif()

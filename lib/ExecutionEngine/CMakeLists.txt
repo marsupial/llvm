@@ -26,7 +26,3 @@ endif( LLVM_USE_OPROFILE )
 if( LLVM_USE_INTEL_JITEVENTS )
   add_subdirectory(IntelJITEvents)
 endif( LLVM_USE_INTEL_JITEVENTS )
-
-if(CLING_CLANG_RUNTIME_PATCH)
-  add_definitions(-DCLING_CLANG_RUNTIME_PATCH)
-endif()
