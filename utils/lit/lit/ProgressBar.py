@@ -272,7 +272,7 @@ class ProgressBar:
             self.BOL + self.term.UP + self.term.CLEAR_EOL +
             (self.bar % (prefix, '='*n, '-'*(barWidth-n), suffix)) +
             self.XNL +
-            self.term.CLEAR_EOL + message)
+            self.term.CLEAR_EOL + message.decode("utf-8"))
         if not self.term.XN:
             sys.stdout.flush()
 
