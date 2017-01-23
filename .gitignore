@@ -20,6 +20,7 @@
 .sw?
 #OS X specific files.
 .DS_store
+build/*
 
 #==============================================================================#
 # Explicit files to ignore (only matches one).
