@@ -67,14 +67,23 @@ DynamicLibrary DynamicLibrary::getPermanentLibrary(const char *filename,
   if (!filename)
     handle = RTLD_DEFAULT;
 #endif
-  return addPermanentLibrary(handle);
-}
 
-DynamicLibrary DynamicLibrary::addPermanentLibrary(void *handle) {
   // If we've already loaded this library, dlclose() the handle in order to
   // keep the internal refcount at +1.
   if (!OpenedHandles->insert(handle).second)
     dlclose(handle);
+
+  return DynamicLibrary(handle);
+}
+
+DynamicLibrary DynamicLibrary::addPermanentLibrary(void *handle,
+                                                   std::string *errMsg) {
+  SmartScopedLock<true> lock(*SymbolsMutex);
+  // If we've already loaded this library, tell the caller.
+  if (!OpenedHandles->insert(handle).second) {
+    if (errMsg) *errMsg = "Library already loaded";
+    return DynamicLibrary();
+  }
 
   return DynamicLibrary(handle);
 }
