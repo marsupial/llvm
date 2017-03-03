@@ -32,14 +32,12 @@ private:
   SmallVector<SID, 2> RegisteredEHFrameSections;
   uint64_t ImageBase;
 
+  // Fake an __ImageBase pointer by returning the section with the lowest adress
   uint64_t getImageBase() {
     if (!ImageBase) {
-      for (const SectionEntry &Section : Sections) {
-	    if (Section.getName() == ".text") {
-			ImageBase = Section.getLoadAddress();
-			break;
-		}
-      }
+      ImageBase = std::numeric_limits<uint64_t>::max();
+      for (const SectionEntry &Section : Sections)
+        ImageBase = std::min(ImageBase, Section.getLoadAddress());
     }
     return ImageBase;
   }
