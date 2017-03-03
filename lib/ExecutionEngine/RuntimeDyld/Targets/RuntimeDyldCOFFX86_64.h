@@ -48,6 +48,21 @@ private:
     writeBytesUnaligned(Result, Target, 4);
   }
 
+  void runOnEHFrames(SmallVector<SID, 2> &A, SmallVector<SID, 2> *B,
+                     void (RuntimeDyld::MemoryManager::*Meth)(uint8_t *,
+                                                              uint64_t,
+                                                              size_t)) {
+    for (auto const &EHFrameSID : A) {
+      const SectionEntry &Section = Sections[EHFrameSID];
+      (MemMgr.*Meth)(Section.getAddress(), Section.getLoadAddress(),
+                     Section.getSize());
+    }
+    if (B)
+      B->swap(A);
+    else
+      A.clear();
+  }
+
 public:
   RuntimeDyldCOFFX86_64(RuntimeDyld::MemoryManager &MM,
                         RuntimeDyld::SymbolResolver &Resolver)
@@ -263,18 +278,15 @@ public:
   }
 
   void registerEHFrames() override {
-    for (auto const &EHFrameSID : UnregisteredEHFrameSections) {
-      uint8_t *EHFrameAddr = Sections[EHFrameSID].getAddress();
-      uint64_t EHFrameLoadAddr = Sections[EHFrameSID].getLoadAddress();
-      size_t EHFrameSize = Sections[EHFrameSID].getSize();
-      MemMgr.registerEHFrames(EHFrameAddr, EHFrameLoadAddr, EHFrameSize);
-      RegisteredEHFrameSections.push_back(EHFrameSID);
-    }
-    UnregisteredEHFrameSections.clear();
+    runOnEHFrames(UnregisteredEHFrameSections, &RegisteredEHFrameSections,
+                  &RuntimeDyld::MemoryManager::registerEHFrames);
   }
+
   void deregisterEHFrames() override {
-    // Stub
+    runOnEHFrames(RegisteredEHFrameSections, nullptr,
+                  &RuntimeDyld::MemoryManager::deregisterEHFrames);
   }
+
   Error finalizeLoad(const ObjectFile &Obj,
                      ObjSectionToIDMap &SectionMap) override {
     // Look for and record the EH frame section IDs.
