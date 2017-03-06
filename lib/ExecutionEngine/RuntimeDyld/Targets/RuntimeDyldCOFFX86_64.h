@@ -42,10 +42,14 @@ private:
     return ImageBase;
   }
 
-  void writeDeltaReloc(uint8_t *Target, int64_t Addend, uint64_t Delta) {
-    uint64_t Result = Addend + Delta;
-    assert(Result <= UINT32_MAX && "Relocation overflow");
-    writeBytesUnaligned(Result, Target, 4);
+  void writeDeltaReloc(uint8_t *Target, int64_t Addend, uint64_t Value,
+                       uint64_t Base, const char *RelType) {
+    uint64_t Delta = Value - Base;
+    if (Value < Base || ((Delta+Addend) > UINT32_MAX)) {
+      llvm::errs() << RelType << " relocation requires an ordered layout.";
+      writeBytesUnaligned(0, Target, 4);
+    } else
+      writeBytesUnaligned(Delta+Addend, Target, 4);
   }
 
   void runOnEHFrames(SmallVector<SID, 2> &A, SmallVector<SID, 2> *B,
@@ -117,18 +121,18 @@ public:
       break;
     }
 
+    case COFF::IMAGE_REL_AMD64_SECREL: {
+      writeDeltaReloc(Target, RE.Addend, Value, uint64_t(Section.getAddress()),
+                      "IMAGE_REL_AMD64_SECREL");
+      break;
+    }
+
     case COFF::IMAGE_REL_AMD64_ADDR32NB: {
       // ADDR32NB requires an offset less than 2GB from 'ImageBase'.
       // The MemoryManager can make sure this is always true by forcing the
       // memory layout to be: CodeSection < ReadOnlySection < ReadWriteSection.
-      const uint64_t ImageBase = getImageBase();
-      if (Value < ImageBase || ((Value - ImageBase) > UINT32_MAX)) {
-        llvm::errs() << "IMAGE_REL_AMD64_ADDR32NB relocation requires an"
-                     << "ordered section layout.";
-        writeDeltaReloc(Target, 0, 0);
-      } else
-        writeDeltaReloc(Target, RE.Addend, Value - ImageBase);
-
+      writeDeltaReloc(Target, RE.Addend, Value, getImageBase(),
+                      "IMAGE_REL_AMD64_ADDR32NB");
       break;
     }
 
@@ -176,12 +180,6 @@ public:
         StubOffset = i->second;
       }
     }
-
-    // FIXME: If RelType == COFF::IMAGE_REL_AMD64_ADDR32NB we should be able
-    // to ignore the __ImageBase requirement and just forward to the stub
-    // directly as an offset of this section:
-    // writeDeltaReloc(Section.getAddressWithOffset(Offset), 0, StubOffset);
-    // .xdata exception handler's aren't having this though.
 
     // Resolve original relocation to stub function.
     const RelocationEntry RE(SectionID, Offset, RelType, Addend);
