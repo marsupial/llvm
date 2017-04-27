@@ -1,0 +1,72 @@
+platform:
+  - x86
+  - x64
+
+configuration:
+  - Release
+#  - Debug
+
+branches:
+  only:
+    - master
+
+skip_tags: true
+
+cache:
+  - builddir
+  - C:\projects\deps\ninja
+
+clone_depth: 10
+
+os:
+  - Visual Studio 2015
+
+build:
+  parallel: true
+  verbosity: detailed
+
+environment:
+  VSTUDIO_VERS: Visual Studio 14.0
+  matrix:
+    - CMAKE_GEN: Ninja
+    - CMAKE_GEN: Visual Studio 14 2015
+#    - CMAKE_GEN: MinGW Makefiles
+
+matrix:
+  fast_finish: true
+
+install:
+- |-
+  "C:\Program Files (x86)\Microsoft %VSTUDIO_VERS%\VC\vcvarsall.bat" %platform%
+  if not "%CMAKE_GEN%"=="MinGW Makefiles" set SETUP_MINGW=rem
+  %SETUP_MINGW% echo "----- MINGW -----"
+  %SETUP_MINGW% set PATH=%PATH:C:\Program Files (x86)\Git\bin;=%
+  %SETUP_MINGW% set PATH=%PATH:C:\Program Files\Git\bin;=%
+  %SETUP_MINGW% set PATH=%PATH:C:\Program Files\Git\usr\bin;=%
+  %SETUP_MINGW% set PATH=%PATH%;C:\MinGW\bin
+  if not "%CMAKE_GEN%"=="Ninja" set SETUP_NINJA=rem
+  %SETUP_NINJA% echo "----- NINJA -----"
+  %SETUP_NINJA% set PATH=%PATH%;C:\projects\deps\ninja
+  if exist "C:\projects\deps\ninja\" set SETUP_NINJA=rem
+  %SETUP_NINJA% appveyor DownloadFile "https://github.com/ninja-build/ninja/releases/download/v1.7.2/ninja-win.zip" -FileName ninja.zip
+  %SETUP_NINJA% 7z x ninja.zip -oC:\projects\deps\ninja > nul
+  if "%CMAKE_GEN:~0,6%"=="Visual" if %platform%=="x64" set CMAKE_GEN=%CMAKE_GEN% Win64
+
+build_script:
+- |-
+  mkdir build
+  cd build
+  cmake ../ -DLLVM_OPTIMIZED_TABLEGEN=ON -DLLVM_TARGETS_TO_BUILD=X86 -DCMAKE_BUILD_TYPE=Release -G"%CMAKE_GEN%"
+  cmake --build . --config Release --target check-llvm
+
+
+init:
+- ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+- cmd: wmic os get osarchitecture
+- cmd: echo platform is %platform%
+- cmd: set
+
+on_failure:
+# Your RDP session is limited by overall build time (60 min).
+# On every failing build, we have to wait for hours... Uncomment the next line if remote access to the machine is really needed (e.g. for debugging)
+- ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
